@@ -9,11 +9,15 @@
 
 **Our Data visualisation ideas are among others as follows:**
 Time series: the number of reviews throughout time to find out when do marketing
+
 Mapping: the rating of hotels in different geography
 
 
 **Related data:**
 [Link](https://www.kaggle.com/jiashenliu/515k-hotel-reviews-data-in-europe) - Main dataset regarding mid & high-end hotel reviews in Europe
+
 [Link](https://www.kaggle.com/ployyyywa/global-hotel-chain-presence) - Dataset on global hotel chain presence
+
 [Link](https://www.kaggle.com/ishansingh88/europe-hotel-satisfaction-score) - Dataset on hotel satisfaction scores 
+
 [Link](https://www.scrapehero.com/scrape-property-data-from-booking-com-using-google-chrome/) - We will also try to scrape the data directly from Booking.com
