@@ -469,3 +469,134 @@ reviews_by_subregion<- hotel_review_nationality  %>%  #creating summary for subr
 ```
 
 
+# Reviewers' origin by region
+```{r}
+
+
+# pivoting regions
+reviews_by_region_pivot<- reviews_by_region %>% 
+  pivot_longer(cols = 3:4, names_to= "type_review", values_to= "score", values_drop_na = TRUE) # pivoted dataframe
+
+reviews_by_region_pivot$type_review<- reviews_by_region_pivot$type_review %>%  factor(levels= c("avg_no_negative", "avg_no_positive")) # creating avg no of positive & negative words per region + average review score per region
+
+# creating a cool chart
+reviews_by_region_pivot <- reviews_by_region_pivot%>%
+  mutate(score_chart = ifelse(type_review == "avg_no_positive", 
+                                 score,
+                                 -1*score)) %>% 
+  mutate(is_extreme = ifelse(score_chart>20, "1",
+                             ifelse(score_chart< -19, "2",
+                                    ifelse(score_chart>-19 & score_chart <0, "3", "4"))))
+
+
+my_colours_positive<- c("#45B05F", "tomato","#FFBAAD","#A8DDB5") # scale for the chart
+ 
+# negative and positive
+plot_region_reviews<- reviews_by_region_pivot %>%
+  ggplot(aes(x = reorder(region,avg_review), fill=is_extreme))+
+  geom_bar(aes(y = score_chart),stat = "identity")+
+  coord_flip() +
+  theme_minimal()+
+  geom_text(aes(y=avg_review, label=round(avg_review,1)),family = "Montserrat", fontface="bold", colour="black")+
+  scale_y_continuous(breaks=seq(-20,20,5)) +
+  theme(panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        axis.ticks.length = unit(.20, "cm"),
+        plot.title = element_text(color = "grey20",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "grey40", face="plain", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "bold"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "bold"),
+        axis.text.x=element_text(family="Montserrat", size=7),
+        legend.text=element_text(family="Montserrat", size=7),
+        legend.title=element_text(family="Montserrat", size=8, face="bold"),
+        legend.position = "none")+
+    labs(title = "The most criticising guests come from Europe,\nthe most positive come from Australia", subtitle= "Number of positive and negative words per review per continent and average review score", x= "Region", y= "Average number of positive/negative words in a review", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
+  scale_fill_manual(values = my_colours_positive) +
+  scale_y_continuous(labels=abs)+
+  geom_hline(yintercept = -18, linetype="dashed", 
+                color = "tomato", size=1.5)+
+  geom_hline(yintercept = 19.5, linetype="dashed", 
+                color = "#45B05F", size=1.5)
+   
+   
+    my_text1r <- "Negative"
+    my_text2r <- "Positive"
+    my_text3r <- "Average review score"
+my_grob = grid.text(my_text1r, x=0.43,  y=0.83,gp=gpar(fontfamily="Montserrat",fontsize= 11, col="tomato", fontface="bold"))
+my_grob2 = grid.text(my_text2r, x=0.54,  y=0.83,gp=gpar(fontfamily="Montserrat",fontsize= 11, col="#F1FFEB", fontface=2))
+my_grob3 = grid.text(my_text3r, x=0.68,  y=0.95,gp=gpar(fontfamily="Montserrat",fontsize= 8, col="black", fontface=2))
+
+ plot_region_reviews + annotation_custom(my_grob) + annotation_custom(my_grob2) + annotation_custom(my_grob3)
+
+```
+
+
+
+# Reviewers' origin by Subregion
+
+```{r}
+reviews_by_subregion_pivot<- reviews_by_subregion %>% 
+  pivot_longer(cols = 4:5, names_to= "type_review", values_to= "score", values_drop_na = TRUE) # pivoted dataframe
+
+
+
+reviews_by_subregion_pivot$type_review<- reviews_by_subregion_pivot$type_review %>%  factor(levels= c("avg_no_negative", "avg_no_positive")) # creating avg no of positive & negative words per region + average review score per subregion
+
+
+
+reviews_by_subregion_pivot <- reviews_by_subregion_pivot%>%
+  mutate(score_chart = ifelse(type_review == "avg_no_positive",
+                                 score,
+                                 -1*score)) %>% 
+  mutate(is_extreme = ifelse(score_chart>17.5, "1",
+                             ifelse(score_chart< -17.5, "2",
+                                    ifelse(score_chart>-17.5 & score_chart <0, "3", "4"))))
+
+
+plot_subregion_reviews <-reviews_by_subregion_pivot %>%
+  ggplot(aes(x = reorder(sub_region,avg_review), fill = is_extreme))+
+  geom_bar(aes(y = score_chart),stat = "identity")+
+  coord_flip() +
+  geom_text(aes(y=avg_review, label=round(avg_review,1)),family = "Montserrat", fontface="bold", colour="black")+
+  scale_y_continuous(breaks=seq(-20,20,5)) +
+  theme(panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        axis.ticks.length = unit(.20, "cm"),
+        plot.title = element_text(color = "grey20",size=10,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "grey40", face="plain", ,size= 8,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "bold"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "bold"),
+        axis.text.x=element_text(family="Montserrat", size=7),
+        legend.text=element_text(family="Montserrat", size=7),
+        legend.title=element_text(family="Montserrat", size=8, face="bold"),
+        legend.position = "none")+
+    labs(title = " Guests from Europe & North America seem to be \nmost influencial ones and shaping the opinion", subtitle= "Average number of positive/negative words in a review and average review score", x= "Region", y= "Average number of positive/negative words in a review", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
+  scale_fill_manual(values = my_colours_positive) +
+  scale_y_continuous(labels=abs)+
+   geom_hline(yintercept = -17.5, linetype="dashed", 
+                color = "tomato", size=0.8)+
+  geom_hline(yintercept = 17.5, linetype="dashed", 
+                color = "#45B05F", size=0.8)
+   
+   
+     my_text1s <- "Negative"
+    my_text2s <- "Positive"
+    my_text3s <- "Average \nreview score"
+my_grobs1 = grid.text(my_text1s, x=0.425,  y=0.85,gp=gpar(fontfamily="Montserrat",fontsize= 8, col="tomato", fontface="bold"))
+my_grobs2 = grid.text(my_text2s, x=0.545,  y=0.85,gp=gpar(fontfamily="Montserrat",fontsize= 8, col="#3FA259", fontface=2))
+my_grobs3 = grid.text(my_text3s, x=0.77,  y=0.94,gp=gpar(fontfamily="Montserrat",fontsize= 9, col="black", fontface=2))
+
+ plot_subregion_reviews + annotation_custom(my_grobs1) + annotation_custom(my_grobs2)+annotation_custom(my_grobs3)
+
+```
+
+
+
