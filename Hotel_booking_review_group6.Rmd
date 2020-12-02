@@ -136,7 +136,7 @@ chain_size_pivot %>%
 
 # charts showing how big Europe is in these sectors
 
-my_colours <- c("grey70", "#8856A7")
+my_colours <- c("grey70", "#2FABE1")
 is_europe<-  chain_size_pivot_relevant%>% 
 mutate(
     is_europe = ifelse(region == "Europe", TRUE, FALSE))
@@ -150,8 +150,8 @@ theme_minimal() +
         axis.line = element_line(size = 1, colour = "grey80"),
         axis.ticks = element_line(size = 3,colour = "grey80"),
         axis.ticks.length = unit(.20, "cm"),
-        plot.title = element_text(color = "#810F7C",size=15,face="bold", family= "Montserrat"),
-        plot.subtitle = element_text(color = "#810F7C", face="plain", ,size= 10,family= "Montserrat"),
+        plot.title = element_text(color = "#043680",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#043680", face="bold", ,size= 10,family= "Montserrat"),
         plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
         axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "bold"),
         axis.text.y=element_text(family="Montserrat", size=7),
@@ -184,7 +184,7 @@ chain_types_europe<- chain_size_pivot %>%
   summarise(count=n())
 
 
-my_colours2 <- c("grey70", "#7BCC8F")
+my_colours2 <- c("grey70", "#043680")
 is_chain<-  chain_types_europe%>% 
 mutate(
     is_chain = ifelse(chain_scale == "Luxury Chains",  TRUE,
@@ -200,8 +200,8 @@ theme_minimal() +
         axis.line = element_line(size = 1, colour = "grey80"),
         axis.ticks = element_line(size = 3,colour = "grey80"),
         axis.ticks.length = unit(.20, "cm"),
-        plot.title = element_text(color = "#4FBAB0",size=15,face="bold", family= "Montserrat"),
-        plot.subtitle = element_text(color = "#4FBAB0", face="plain", ,size= 10,family= "Montserrat"),
+        plot.title = element_text(color = "#2FABE1",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#2FABE1", face="bold", ,size= 10,family= "Montserrat"),
         plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
         axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "bold"),
         axis.text.y=element_text(family="Montserrat", size=7),
@@ -213,15 +213,16 @@ theme_minimal() +
     labs(title = "Europe seems to be abundant in the chains of our aim ", subtitle= "Number of all the types of chains in Europe", x="Hotel sector", y=" Number of chians", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
   scale_y_continuous()+
   scale_fill_manual(values = my_colours2)+ 
-   geom_label(aes(label=count),family = "Montserrat", fontface="bold", color="grey20", )
+   geom_label(aes(label=count),family = "Montserrat", fontface="bold", color="white", )
  
  my_text <- "Upper Upscale + Luxury = 162"
-my_grob = grid.text(my_text, x=0.82,  y=0.7,gp=gpar(fontfamily="Montserrat",fontsize=10, col="#43A2CA", fontface="bold"))
+my_grob = grid.text(my_text, x=0.82,  y=0.7,gp=gpar(fontfamily="Montserrat",fontsize=10, col="#2FABE1", fontface="bold"))
 
 gg + annotation_custom(my_grob)
  
-```
 
+
+```
 
 # Average rating of hotels by country
 
@@ -234,7 +235,7 @@ hotel3<-hotel2 %>%
   select(country,average_score) 
   
 
-my_colours3 <- c("white", "#7BCC8F")
+my_colours3 <- c("white", "#2FABE1")
 is_france<-  hotel3%>% 
 mutate(
     is_france = ifelse(country == "France",  TRUE, FALSE)) %>% 
@@ -251,7 +252,7 @@ ggplot(is_france, aes(x=average_score,y=reorder(country,average_score),fill=is_f
         axis.ticks = element_line(size = 3,colour = "grey80"),
         axis.ticks.length = unit(.20, "cm"),
         plot.title = element_text(color = "black",size=15,face="bold", family= "Montserrat"),
-        plot.subtitle = element_text(color = "#45B05F", face="bold", ,size= 10,family= "Montserrat"),
+        plot.subtitle = element_text(color = "#043680", face="bold", ,size= 10,family= "Montserrat"),
         plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
         axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "plain"),
         axis.text.y=element_text(family="Montserrat", size=7),
@@ -263,7 +264,6 @@ ggplot(is_france, aes(x=average_score,y=reorder(country,average_score),fill=is_f
     labs(title = "France has the highest median rating", subtitle= "Distribution of average ratings of hotels across 6 selected countries", x="Average rating of hotels", y="Country", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
   scale_fill_manual(values = my_colours3)
 ```
-
 
 # Hotels of excellent ratings, by country
 
@@ -285,7 +285,7 @@ ggplot(hotel4,aes(x=reorder(country,count),y=count,fill=factor(is_best)))+
         axis.ticks = element_line(size = 3,colour = "grey80"),
         axis.ticks.length = unit(.20, "cm"),
         plot.title = element_text(color = "black",size=15,face="bold", family= "Montserrat"),
-        plot.subtitle = element_text(color = "#45B05F", face="bold", ,size= 10,family= "Montserrat"),
+        plot.subtitle = element_text(color = "#043680", face="bold", ,size= 10,family= "Montserrat"),
         plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
         axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "plain"),
         axis.text.y=element_text(family="Montserrat", size=7),
@@ -295,11 +295,10 @@ ggplot(hotel4,aes(x=reorder(country,count),y=count,fill=factor(is_best)))+
         legend.title=element_text(family="Montserrat", size=8, face="bold"),
         legend.position="none")+
     labs(title = "UK & France dominate hotels with >9 average rating", subtitle= "Number of >9 rating hotels in 6 selected countries", x="Country", y="No. of hotels with rating >9", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence")+
-  scale_fill_manual(values=c("grey80","#7BCC8F")) +
+  scale_fill_manual(values=c("grey80","#2FABE1")) +
   coord_flip()
+
 ```
-
-
 
 # Proportion of Top 5 Reviewer Nationalities per Country
 
@@ -578,7 +577,7 @@ plot_subregion_reviews <-reviews_by_subregion_pivot %>%
         legend.text=element_text(family="Montserrat", size=7),
         legend.title=element_text(family="Montserrat", size=8, face="bold"),
         legend.position = "none")+
-    labs(title = " Guests from Europe & North America seem to be \nmost influencial ones and shaping the opinion", subtitle= "Average number of positive/negative words in a review and average review score", x= "Region", y= "Average number of positive/negative words in a review", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
+    labs(title = "Guests from Europe & North America seem to be \nmost influencial ones and shaping the opinion", subtitle= "Average number of positive/negative words in a review and average review score", x= "Region", y= "Average number of positive/negative words in a review", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
   scale_fill_manual(values = my_colours_positive) +
   scale_y_continuous(labels=abs)+
    geom_hline(yintercept = -17.5, linetype="dashed", 
@@ -597,7 +596,6 @@ my_grobs3 = grid.text(my_text3s, x=0.77,  y=0.94,gp=gpar(fontfamily="Montserrat"
  plot_subregion_reviews + annotation_custom(my_grobs1) + annotation_custom(my_grobs2)+annotation_custom(my_grobs3)
 
 ```
-
 
 # Creating wordclouds with most popular positive/ negative words
 
@@ -690,6 +688,39 @@ wordcloud(words = wordCountDoc_pos$word,
 
 ```
 
+##Negatvie wordcloud
+```{r}
+##Negatvie wordcloud
+#convert to tibble
+m <- as.matrix(DTM_neg)
+DTM_tbl <- as_tibble(m)
+#rm (m,hotel3,DTM_neg,DTM_pos,review_pos,review_neg,DTM_tbl,wordCountDoc_pos)
+DTM_neg_tidy <- pivot_longer(DTM_tbl, cols = everything(), names_to = "word", values_to = "wordCount")
+
+# Order by freq
+wordCountDoc_neg <- DTM_neg_tidy %>%  
+        group_by(word) %>% 
+        summarise(total_neg = sum(wordCount)) %>% 
+        arrange(desc(total_neg)) 
+
+print(wordCountDoc_neg %>% top_n(5))
+
+#wordcloud
+colors()
+
+wordcloud(words = wordCountDoc_neg$word, 
+          freq = wordCountDoc_neg$total_neg, 
+          max.words = 150,
+          min.freq = 140,
+          scale = c(3, 0.5), 
+          random.order = FALSE,
+          rot.per = 0.35,
+          colors = c("#ccebc5", "#7bccc4", "#7fbf7b","#4eb3d3","#8c6bb1","#810f7c"))+
+    title(main = "Most Frequent Words in Negative Reviews", col.main = "#810f7c", size = 8, family="Montserrat", face = "bold")
+
+```
+
+
 
 # Hotel reviewed by highest number of alleged bots
 ```{r}
@@ -709,8 +740,8 @@ theme_minimal() + #put simple theme to emnphasise the graphs
         axis.line = element_line(size = 1, colour = "grey80"),
         axis.ticks = element_line(size = 3,colour = "grey80"),
         axis.ticks.length = unit(.20, "cm"),
-        plot.title = element_text(color = "#0868ac",size=15,face="bold", family= "Montserrat"),
-        plot.subtitle = element_text(color = "#0868ac", face="plain", ,size= 10,family= "Montserrat"),
+        plot.title = element_text(color = "#043680",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#043680", face="plain", ,size= 10,family= "Montserrat"),
         plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
         axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "plain"),
         axis.text.y=element_text(family="Montserrat", size=7),
@@ -721,10 +752,9 @@ theme_minimal() + #put simple theme to emnphasise the graphs
         legend.position = "none")+
     labs(title = "Hotels reviewed by \nhighest number of alleged bots", subtitle= "", x="Hotels with alleged use of bots", y="Count", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
   scale_y_continuous()+
-  scale_fill_manual(values = c("grey80", "#0868ac"))+ #specifying the colours
+  scale_fill_manual(values = c("grey80", "#2FABE1"))+ #specifying the colours
    geom_label(aes(label=count))
 ```
-
 
 
 # Meaningless reviews vs meaningful reviews
@@ -746,8 +776,8 @@ theme_minimal() +
         axis.line = element_line(size = 1, colour = "grey80"),
         axis.ticks = element_line(size = 3,colour = "grey80"),
         axis.ticks.length = unit(.20, "cm"),
-        plot.title = element_text(color = "#0868ac",size=15,face="bold", family= "Montserrat"),
-        plot.subtitle = element_text(color = "#0868ac", face="plain", ,size= 10,family= "Montserrat"),
+        plot.title = element_text(color = "#043680",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#043680", face="plain", ,size= 10,family= "Montserrat"),
         plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
         axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "plain"),
         axis.text.y=element_text(family="Montserrat", size=7),
@@ -759,14 +789,16 @@ theme_minimal() +
     labs(title = "Two-thirds of bots produce meaningless reviews", subtitle= "", x="Type of review", y="Count", caption="(We define repetitive reviews as exactly one of 'No Negative', 'Nothing', 'nothing' and 'Everything')") +
   scale_y_continuous()+
   scale_fill_manual(values = c("grey80"))+
-  geom_label(aes(label=sum))
+  geom_label(aes(label=sum),family="Montserrat", fontface="bold" )
 
 bots_graph
 my_text1r <- "No Negative, \nNothing, \nnothing, & \nEverything"
-my_grobr1 = grid.text(my_text1r, x=0.57,  y=0.82,gp=gpar(fontfamily="Montserrat",fontsize= 12, col="#810f7c", fontface="bold"))
+my_grobr1 = grid.text(my_text1r, x=0.57,  y=0.82,gp=gpar(fontfamily="Montserrat",fontsize= 12, col="#2FABE1", fontface="bold"))
 
  bots_graph + annotation_custom(my_grobr1) 
 ```
+
+
 
 
 Thank you!
