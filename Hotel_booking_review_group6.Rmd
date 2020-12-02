@@ -61,4 +61,88 @@ describe(global_hotel_chain_size_clean)
 ```
 
 
+# Europe vs. different continents - Luxury Chains, Upper Upscale Chains
+Now we are good to go. First analysis:
+```{r}
+ # distribution of all the variables chain scale
+data.frame(table(global_hotel_chain_size_clean$chain_scale))
+
+# changing variables to factors
+global_hotel_chain_size_clean$chain_scale <- global_hotel_chain_size_clean$chain_scale %>% factor(levels= c("Economy Chains", "Midscale Chains", "Upper Midscale Chains","Upscale Chains", "Upper Upscale Chains", "Luxury Chains" ))
+
+ # checking if the data is correct
+data.frame(table(global_hotel_chain_size_clean$chain_scale))
+
+
+# pivoting the data & cleaning
+chain_size_pivot<-global_hotel_chain_size_clean %>% 
+  pivot_longer(cols = 5:11, names_to= "region", values_to= "x", values_drop_na = TRUE) %>% 
+  mutate( region = case_when(
+    region== "africa" ~ "Africa",
+    region=="apac" ~ "APAC countries",
+    region== "c_s_america" ~ "Central & South America",
+    region== "europe" ~ "Europe",
+    region== "middle_east" ~ "Middle East",
+    region== "n_america_excl_us" ~ "North America exlc. US",
+    region== "united_states" ~ "United States",
+  )) %>% 
+  select(-x)
+            
+# Luxury Chains across countries
+chain_size_pivot_relevant<- chain_size_pivot %>% 
+  filter(chain_scale== "Luxury Chains"|| chain_scale== "Upper Upscale Chains" || chain_scale== "Upscale Chains" ) %>% 
+  group_by( region) %>% 
+  summarise(count=n())
+
+# Upper Upscale Chains across countires
+chain_size_pivot %>% 
+  filter(chain_scale== "Upper Upscale Chains") %>% 
+  group_by( region) %>% 
+  summarise(count=n())
+
+#Upscale Chains across countires
+chain_size_pivot %>% 
+  filter(chain_scale== "Upscale Chains") %>% 
+  group_by( region) %>% 
+  summarise(count=n())
+
+# charts showing how big Europe is in these sectors
+
+my_colours <- c("grey70", "#8856A7")
+is_europe<-  chain_size_pivot_relevant%>% 
+mutate(
+    is_europe = ifelse(region == "Europe", TRUE, FALSE))
+
+# Chart of the data across all the regions
+first_plot<- ggplot(is_europe, aes(x=reorder(region,-count), y=count, fill=is_europe)) +
+    geom_bar(stat="identity", alpha=0.8)+
+theme_minimal() +
+  theme(panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        axis.ticks.length = unit(.20, "cm"),
+        plot.title = element_text(color = "#810F7C",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#810F7C", face="plain", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "bold"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "bold"),
+        axis.text.x=element_text(family="Montserrat", size=7),
+        legend.text=element_text(family="Montserrat", size=7),
+        legend.title=element_text(family="Montserrat", size=8, face="bold"),
+        legend.position = "none")+
+    labs(title = " Europe is the most aboundant region \nin Luxury & Upper Upscale Chains", subtitle= "Number of Luxury, Upper Upscale & Upscale Chains across the regions", x="Region", y=" Number of chians", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
+  scale_y_continuous()+
+  scale_fill_manual(values = my_colours)+ 
+   geom_label(aes(label=count),family = "Montserrat", fontface="bold", color="grey20", )
+   
+first_plot
+
+
+
+```
+
+
+
 
