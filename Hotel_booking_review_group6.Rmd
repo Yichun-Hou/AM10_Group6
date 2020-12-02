@@ -60,6 +60,34 @@ describe(global_hotel_chain_size_clean)
 
 ```
 
+# Cleaning Data Set hotels_raw
+```{r}
+Hmisc::describe(hotels_raw)
+```
+
+```{r}
+glimpse(hotels_raw)
+hotels_date_correct<-hotels_raw %>% mutate(review_date=as.Date(review_date,"%d/%m/%Y")) %>% mutate(country=word(hotel_address,-1,sep=fixed(" ")))
+glimpse(hotels_date_correct)
+```
+
+```{r}
+#Remove empty columns and rows
+hotel1<-remove_empty(hotels_date_correct, which = c("rows","cols"))%>%
+  filter(!is.na(lat))
+
+#Check for duplicates (visualize bots)
+duplicates<-hotel1%>%get_dupes(positive_review, negative_review, hotel_name, reviewer_nationality)
+duplicates
+
+#delete duplicates
+hotel2<-hotel1%>%
+  distinct(positive_review, negative_review, hotel_name, reviewer_nationality, .keep_all = TRUE)
+
+md.pattern(hotel2,rotate.names = T)
+
+```
+
 
 # Europe vs. different continents - Luxury Chains, Upper Upscale Chains
 Now we are good to go. First analysis:
