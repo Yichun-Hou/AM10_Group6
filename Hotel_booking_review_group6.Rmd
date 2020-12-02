@@ -144,5 +144,58 @@ first_plot
 ```
 
 
+# European landscape in terms of chain types
+
+```{r}
+
+
+# data on how in Europe the chains are distributed
+chain_types_europe<- chain_size_pivot %>% 
+  filter(region=="Europe") %>% 
+  group_by( chain_scale) %>% 
+  summarise(count=n())
+
+
+my_colours2 <- c("grey70", "#7BCC8F")
+is_chain<-  chain_types_europe%>% 
+mutate(
+    is_chain = ifelse(chain_scale == "Luxury Chains",  TRUE,
+                      ifelse(chain_scale== "Upper Upscale Chains", TRUE, FALSE)))
+
+# Chart of the data across all the regions
+ 
+ gg<-ggplot(is_chain, aes(x=reorder(chain_scale,chain_scale), y=count, fill=is_chain)) +
+    geom_bar(stat="identity", alpha=0.8)+
+theme_minimal() +
+  theme(panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        axis.ticks.length = unit(.20, "cm"),
+        plot.title = element_text(color = "#4FBAB0",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#4FBAB0", face="plain", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "bold"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "bold"),
+        axis.text.x=element_text(family="Montserrat", size=7),
+        legend.text=element_text(family="Montserrat", size=7),
+        legend.title=element_text(family="Montserrat", size=8, face="bold"),
+        legend.position = "none")+
+    labs(title = "Europe seems to be abundant in the chains of our aim ", subtitle= "Number of all the types of chains in Europe", x="Hotel sector", y=" Number of chians", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
+  scale_y_continuous()+
+  scale_fill_manual(values = my_colours2)+ 
+   geom_label(aes(label=count),family = "Montserrat", fontface="bold", color="grey20", )
+ 
+ my_text <- "Upper Upscale + Luxury = 162"
+my_grob = grid.text(my_text, x=0.82,  y=0.7,gp=gpar(fontfamily="Montserrat",fontsize=10, col="#43A2CA", fontface="bold"))
+
+gg + annotation_custom(my_grob)
+ 
+
+
+```
+
+
 
 
