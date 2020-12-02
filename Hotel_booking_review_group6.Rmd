@@ -440,3 +440,32 @@ panel.grid.major.y = element_line(color = "gray60", size = 0.1),
 stackedbarplot
 
 ```
+
+# Region and subregion reviers' background
+
+## Creating variables
+```{r}
+glimpse(hotel2)
+
+
+hotel_review_nationality<- hotel2 %>%  #merging main table with countries and continents of reviwers' origin
+  left_join(country_continent, by=c("reviewer_nationality"="name")) %>% 
+  drop_na(reviewer_nationality, region)
+
+
+reviews_by_region<- hotel_review_nationality  %>% #creating summary for regions
+  group_by(region) %>% 
+  summarise(avg_review= mean(reviewer_score),
+            avg_no_positive= mean(review_total_positive_word_counts),
+            avg_no_negative= mean(review_total_negative_word_counts)) %>% 
+  arrange(desc(avg_review))
+
+reviews_by_subregion<- hotel_review_nationality  %>%  #creating summary for subregions
+  group_by(region,sub_region) %>% 
+  summarise(avg_review= mean(reviewer_score),
+            avg_no_positive= mean(review_total_positive_word_counts),
+            avg_no_negative= mean(review_total_negative_word_counts)) %>% 
+  arrange(desc(avg_review))
+```
+
+
