@@ -725,3 +725,49 @@ theme_minimal() + #put simple theme to emnphasise the graphs
    geom_label(aes(label=count))
 ```
 
+
+
+# Meaningless reviews vs meaningful reviews
+```{r}
+#popularity of bots
+bots_by_popularity<-duplicates%>%
+  mutate(negative_review_renew=ifelse(negative_review=="No Negative"|negative_review=="Nothing"|negative_review=="nothing"|negative_review=="Everything","Meaningless review","Meaningful review"))%>% #define meaningless review and meaningful review for visualisation
+  group_by(negative_review_renew)%>%
+  summarise(sum=n())%>%
+  arrange(desc(sum))%>%
+  mutate(is_others=ifelse(negative_review_renew=="Meaningful review",1,0))%>% #deprecated line, originally used for fill aesthetic colouring, but we cancelled the colouring already
+  slice(1:2)
+
+bots_graph <- ggplot(bots_by_popularity, aes(x=reorder(negative_review_renew,-sum), y=sum)) +
+    geom_bar(stat="identity", alpha=0.8)+
+theme_minimal() +
+  theme(panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        axis.ticks.length = unit(.20, "cm"),
+        plot.title = element_text(color = "#0868ac",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#0868ac", face="plain", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "plain"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "plain"),
+        axis.text.x=element_text(family="Montserrat", size=7),
+        legend.text=element_text(family="Montserrat", size=7),
+        legend.title=element_text(family="Montserrat", size=8, face="bold"),
+        legend.position = "none")+
+    labs(title = "Two-thirds of bots produce meaningless reviews", subtitle= "", x="Type of review", y="Count", caption="(We define repetitive reviews as exactly one of 'No Negative', 'Nothing', 'nothing' and 'Everything')") +
+  scale_y_continuous()+
+  scale_fill_manual(values = c("grey80"))+
+  geom_label(aes(label=sum))
+
+bots_graph
+my_text1r <- "No Negative, \nNothing, \nnothing, & \nEverything"
+my_grobr1 = grid.text(my_text1r, x=0.57,  y=0.82,gp=gpar(fontfamily="Montserrat",fontsize= 12, col="#810f7c", fontface="bold"))
+
+ bots_graph + annotation_custom(my_grobr1) 
+```
+
+
+Thank you!
+Group members: Malay Memani, Derek Leung, Samy Mohamad, Yichun Hou, Agnieszka Prawda, Magdalena Cloppenburg
