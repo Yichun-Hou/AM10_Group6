@@ -599,4 +599,94 @@ my_grobs3 = grid.text(my_text3s, x=0.77,  y=0.94,gp=gpar(fontfamily="Montserrat"
 ```
 
 
+# Creating wordclouds with most popular positive/ negative words
+
+## Preparing dataset
+
+```{r}
+
+hotelcloud<-hotel2[!is.na(hotel2$positive_review), ]
+hotelcloud<-hotel2[!is.na(hotel2$negative_review), ]
+
+write.csv(hotelcloud,'hotel4wordcloud.csv' )
+```
+
+
+
+```{r wordcloud}
+hotelcloud2<-vroom("hotel4wordcloud.csv")
+
+#clean reviews and select only those with useful information
+hotelcloud3<-hotelcloud2 %>% 
+  filter(sapply(strsplit(positive_review, " "), length)>3) %>% 
+  filter(sapply(strsplit(negative_review, " "), length)>3)
+
+#randomly select 6000 data to visualize
+hotelcloud4<-hotelcloud3[sample(nrow(hotelcloud3), 6000), ]
+
+rm(hotelcloud3,hotelcloud2)
+
+#build corpus
+review_pos <- Corpus(VectorSource(hotelcloud4$positive_review)) 
+review_neg <- Corpus(VectorSource(hotelcloud4$negative_review)) 
+
+#skip the words: room and hotel, cuz they dont give useful information
+words <- c("room","hotel")
+review_pos <- tm_map(review_pos, removeWords, words)
+review_neg <- tm_map(review_neg, removeWords, words)
+
+#count frequency
+DTM_pos <- DocumentTermMatrix(review_pos, control = list(
+            tolower = TRUE,
+            removeNumbers = TRUE,
+            stopwords = TRUE,
+            removePunctuation = TRUE,
+            stripWhitespace = TRUE))
+dim(DTM_pos) 
+
+DTM_neg <- DocumentTermMatrix(review_neg, control = list(
+            tolower = TRUE,
+            removeNumbers = TRUE,
+            stopwords = TRUE,
+            removePunctuation = TRUE,
+            stripWhitespace = TRUE))
+inspect(DTM_neg) 
+
+rm(review_neg,review_pos)
+```
+
+##Positive wordcloud
+```{r}
+##Positive wordcloud
+
+#convert to tibble
+m <- as.matrix(DTM_pos)
+DTM_tbl <- as_tibble(m)
+#rm (m,hotel3,DTM_neg,DTM_pos,review_pos,review_neg,DTM_tbl,wordCountDoc_pos)
+DTM_pos_tidy <- pivot_longer(DTM_tbl, cols = everything(), names_to = "word", values_to = "wordCount")
+
+# Order by freq
+wordCountDoc_pos <- DTM_pos_tidy %>%  
+        group_by(word) %>% 
+        summarise(total_pos = sum(wordCount)) %>% 
+        arrange(desc(total_pos)) 
+
+print(wordCountDoc_pos %>% top_n(5))
+
+#wordcloud
+colors()
+
+wordcloud(words = wordCountDoc_pos$word, 
+          freq = wordCountDoc_pos$total_pos, 
+          max.words = 150,
+          scale = c(3, 0.5), 
+          random.order = FALSE,
+          rot.per = 0.35,
+          colors = c("#ccebc5", "#7bccc4", "#7fbf7b","#4eb3d3","#8c6bb1","#810f7c"))+
+  title(main = "Most Frequent Words in Positive Reviews", col.main = "#810f7c", size = 8, family="Montserrat", face = "bold")
+
+
+
+
+```
 
