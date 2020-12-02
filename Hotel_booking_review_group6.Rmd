@@ -1,0 +1,442 @@
+---
+title: "Booking.com European landscape analysis"
+author: "Project Group 6"
+date: "29/11/2020"
+output: html_document
+---
+###Loading Packages
+```{r}
+library(ggplot2)
+library(janitor)
+library(tidyverse)
+library(caret)
+library(lubridate)
+library(factoextra)
+library(vroom)
+library(Hmisc)
+library(mice)
+library(readxl)
+library(skimr)
+library(data.table)
+library(grid)
+library(pBrackets)
+library(showtext)
+font_add_google("Montserrat", "Montserrat") #downloading fonts from Google
+showtext_auto()
+library(data.table)
+library(googlesheets4)
+library(opencage)
+
+```
+
+
+###Importing the Data Set
+```{r setup, include=FALSE}
+hotels_raw<-vroom("Hotel_Reviews 2.csv") %>% clean_names()
+
+global_hotel_chain_size <- read_excel("Global Hotel Chains Size.xlsx") %>%clean_names()
+                                      
+booking_satisfaction <- vroom("Europe Hotel Booking Satisfaction Score.csv")%>%clean_names()
+
+country_continent <- vroom("continents2.csv")%>%clean_names()
+
+```
+# Story Time
+
+ We are a group of individuals working within the Data Analytics Team at Booking.com, and have been asked to gather insights on the mid- to high-end (luxury) hotel market in Europe. We are to present our results to our Team Lead.
+ 
+  
+# Cleaning Data Set global_hotel_chain_sizec
+First, let's have a look at the overall global luxury & upscale hotel market. 
+```{r}
+# let's have a look on our data set
+describe(global_hotel_chain_size) 
+
+#Remove empty columns and rows
+global_hotel_chain_size_clean<-remove_empty(global_hotel_chain_size, which = c("rows","cols"))
+
+
+describe(global_hotel_chain_size_clean) 
+
+```
+
+# Cleaning Data Set hotels_raw
+```{r}
+Hmisc::describe(hotels_raw)
+```
+
+```{r}
+glimpse(hotels_raw)
+hotels_date_correct<-hotels_raw %>% mutate(review_date=as.Date(review_date,"%d/%m/%Y")) %>% mutate(country=word(hotel_address,-1,sep=fixed(" ")))
+glimpse(hotels_date_correct)
+```
+
+```{r}
+#Remove empty columns and rows
+hotel1<-remove_empty(hotels_date_correct, which = c("rows","cols"))%>%
+  filter(!is.na(lat))
+
+#Check for duplicates (visualize bots)
+duplicates<-hotel1%>%get_dupes(positive_review, negative_review, hotel_name, reviewer_nationality)
+duplicates
+
+#delete duplicates
+hotel2<-hotel1%>%
+  distinct(positive_review, negative_review, hotel_name, reviewer_nationality, .keep_all = TRUE)
+
+md.pattern(hotel2,rotate.names = T)
+
+```
+
+
+# Europe vs. different continents - Luxury Chains, Upper Upscale Chains
+Now we are good to go. First analysis:
+```{r}
+ # distribution of all the variables chain scale
+data.frame(table(global_hotel_chain_size_clean$chain_scale))
+
+# changing variables to factors
+global_hotel_chain_size_clean$chain_scale <- global_hotel_chain_size_clean$chain_scale %>% factor(levels= c("Economy Chains", "Midscale Chains", "Upper Midscale Chains","Upscale Chains", "Upper Upscale Chains", "Luxury Chains" ))
+
+ # checking if the data is correct
+data.frame(table(global_hotel_chain_size_clean$chain_scale))
+
+
+# pivoting the data & cleaning
+chain_size_pivot<-global_hotel_chain_size_clean %>% 
+  pivot_longer(cols = 5:11, names_to= "region", values_to= "x", values_drop_na = TRUE) %>% 
+  mutate( region = case_when(
+    region== "africa" ~ "Africa",
+    region=="apac" ~ "APAC countries",
+    region== "c_s_america" ~ "Central & South America",
+    region== "europe" ~ "Europe",
+    region== "middle_east" ~ "Middle East",
+    region== "n_america_excl_us" ~ "North America exlc. US",
+    region== "united_states" ~ "United States",
+  )) %>% 
+  select(-x)
+            
+# Luxury Chains across countries
+chain_size_pivot_relevant<- chain_size_pivot %>% 
+  filter(chain_scale== "Luxury Chains"|| chain_scale== "Upper Upscale Chains" || chain_scale== "Upscale Chains" ) %>% 
+  group_by( region) %>% 
+  summarise(count=n())
+
+# Upper Upscale Chains across countires
+chain_size_pivot %>% 
+  filter(chain_scale== "Upper Upscale Chains") %>% 
+  group_by( region) %>% 
+  summarise(count=n())
+
+#Upscale Chains across countires
+chain_size_pivot %>% 
+  filter(chain_scale== "Upscale Chains") %>% 
+  group_by( region) %>% 
+  summarise(count=n())
+
+# charts showing how big Europe is in these sectors
+
+my_colours <- c("grey70", "#8856A7")
+is_europe<-  chain_size_pivot_relevant%>% 
+mutate(
+    is_europe = ifelse(region == "Europe", TRUE, FALSE))
+
+# Chart of the data across all the regions
+first_plot<- ggplot(is_europe, aes(x=reorder(region,-count), y=count, fill=is_europe)) +
+    geom_bar(stat="identity", alpha=0.8)+
+theme_minimal() +
+  theme(panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        axis.ticks.length = unit(.20, "cm"),
+        plot.title = element_text(color = "#810F7C",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#810F7C", face="plain", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "bold"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "bold"),
+        axis.text.x=element_text(family="Montserrat", size=7),
+        legend.text=element_text(family="Montserrat", size=7),
+        legend.title=element_text(family="Montserrat", size=8, face="bold"),
+        legend.position = "none")+
+    labs(title = " Europe is the most aboundant region \nin Luxury & Upper Upscale Chains", subtitle= "Number of Luxury, Upper Upscale & Upscale Chains across the regions", x="Region", y=" Number of chians", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
+  scale_y_continuous()+
+  scale_fill_manual(values = my_colours)+ 
+   geom_label(aes(label=count),family = "Montserrat", fontface="bold", color="grey20", )
+   
+first_plot
+
+
+
+```
+
+
+# European landscape in terms of chain types
+
+```{r}
+
+
+# data on how in Europe the chains are distributed
+chain_types_europe<- chain_size_pivot %>% 
+  filter(region=="Europe") %>% 
+  group_by( chain_scale) %>% 
+  summarise(count=n())
+
+
+my_colours2 <- c("grey70", "#7BCC8F")
+is_chain<-  chain_types_europe%>% 
+mutate(
+    is_chain = ifelse(chain_scale == "Luxury Chains",  TRUE,
+                      ifelse(chain_scale== "Upper Upscale Chains", TRUE, FALSE)))
+
+# Chart of the data across all the regions
+ 
+ gg<-ggplot(is_chain, aes(x=reorder(chain_scale,chain_scale), y=count, fill=is_chain)) +
+    geom_bar(stat="identity", alpha=0.8)+
+theme_minimal() +
+  theme(panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        axis.ticks.length = unit(.20, "cm"),
+        plot.title = element_text(color = "#4FBAB0",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#4FBAB0", face="plain", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "bold"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "bold"),
+        axis.text.x=element_text(family="Montserrat", size=7),
+        legend.text=element_text(family="Montserrat", size=7),
+        legend.title=element_text(family="Montserrat", size=8, face="bold"),
+        legend.position = "none")+
+    labs(title = "Europe seems to be abundant in the chains of our aim ", subtitle= "Number of all the types of chains in Europe", x="Hotel sector", y=" Number of chians", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
+  scale_y_continuous()+
+  scale_fill_manual(values = my_colours2)+ 
+   geom_label(aes(label=count),family = "Montserrat", fontface="bold", color="grey20", )
+ 
+ my_text <- "Upper Upscale + Luxury = 162"
+my_grob = grid.text(my_text, x=0.82,  y=0.7,gp=gpar(fontfamily="Montserrat",fontsize=10, col="#43A2CA", fontface="bold"))
+
+gg + annotation_custom(my_grob)
+ 
+```
+
+
+# Average rating of hotels by country
+
+```{r}
+#7.hotels with highest ratings (possible: combined with location)
+
+#average rating of hotels by country
+hotel3<-hotel2 %>%
+  distinct(hotel_name,average_score,country)%>%
+  select(country,average_score) 
+  
+
+my_colours3 <- c("white", "#7BCC8F")
+is_france<-  hotel3%>% 
+mutate(
+    is_france = ifelse(country == "France",  TRUE, FALSE)) %>% 
+   mutate(country=recode(country, "Kingdom" = "United Kingdom"))
+
+
+ggplot(is_france, aes(x=average_score,y=reorder(country,average_score),fill=is_france))+
+  geom_violin()+
+  geom_boxplot(width=0.1)+
+  theme_minimal() +
+  theme(panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        axis.ticks.length = unit(.20, "cm"),
+        plot.title = element_text(color = "black",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#45B05F", face="bold", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "plain"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "plain"),
+        axis.text.x=element_text(family="Montserrat", size=7),
+        legend.text=element_text(family="Montserrat", size=7),
+        legend.title=element_text(family="Montserrat", size=8, face="bold"),
+        legend.position = "none")+
+    labs(title = "France has the highest median rating", subtitle= "Distribution of average ratings of hotels across 6 selected countries", x="Average rating of hotels", y="Country", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
+  scale_fill_manual(values = my_colours3)
+```
+
+
+# Hotels of excellent ratings, by country
+
+```{r}
+##hotels with highest ratings
+##choose all hotels > 8/8.5/9
+hotel4<-hotel3%>%
+  filter(average_score>=9)%>%
+  group_by(country)%>%
+  summarise(count=n())%>%
+  mutate(is_best=ifelse(country=="Kingdom"|country=="France",1,0))
+
+ggplot(hotel4,aes(x=reorder(country,count),y=count,fill=factor(is_best)))+
+  geom_col(position="dodge")+
+  theme_minimal() +
+  theme(panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        axis.ticks.length = unit(.20, "cm"),
+        plot.title = element_text(color = "black",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#45B05F", face="bold", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "plain"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "plain"),
+        axis.text.x=element_text(family="Montserrat", size=7, angle=30, hjust=1),
+        legend.text=element_text(family="Montserrat", size=7),
+        legend.title=element_text(family="Montserrat", size=8, face="bold"),
+        legend.position="none")+
+    labs(title = "UK & France dominate hotels with >9 average rating", subtitle= "Number of >9 rating hotels in 6 selected countries", x="Country", y="No. of hotels with rating >9", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence")+
+  scale_fill_manual(values=c("grey80","#7BCC8F")) +
+  coord_flip()
+```
+
+
+
+# Proportion of Top 5 Reviewer Nationalities per Country
+
+```{r}
+
+
+maggiehoteldata <- hotel2 %>% mutate(country=recode(
+  country, `Kingdom`= "United Kingdom")) %>%  # change Kingdom to United Kingdom to allow matching
+  rename(hotelcountry = country)
+
+# UK
+## get counts and proportions of reviewer nationalities 
+ukdata <- maggiehoteldata %>% 
+  filter(hotelcountry == "United Kingdom") %>%
+  group_by(reviewer_nationality) %>%
+  summarise(countreviewernat = n(), 
+            propreviewernat = countreviewernat / 261509) %>%
+  arrange(desc(countreviewernat)) %>%
+  mutate(hotelcountry = "United Kingdom") %>%
+  slice(1:5)
+
+# ukdata %>% 
+  # summarise(sumcount = sum(countreviewernat))
+# 261509 total reviews
+
+# Netherlands
+## get counts and proportions of reviewer nationalities 
+nldata <- maggiehoteldata %>% 
+  filter(hotelcountry == "Netherlands") %>%
+  group_by(reviewer_nationality) %>%
+  summarise(countreviewernat = n(),
+            propreviewernat = countreviewernat / 57119) %>%
+  arrange(desc(countreviewernat)) %>%
+  mutate(hotelcountry = "Netherlands") %>%
+  slice(1:5)
+
+# nldata %>% 
+  # summarise(sumcount = sum(countreviewernat))
+# 57119 total reviews 
+
+# Austria
+## get counts and proportions of reviewer nationalities 
+ausdata <- maggiehoteldata %>%
+  filter(hotelcountry == "Austria") %>%
+  group_by(reviewer_nationality) %>%
+  summarise(countreviewernat = n(),
+            propreviewernat = countreviewernat / 36241) %>%
+  arrange(desc(countreviewernat)) %>%
+  mutate(hotelcountry = "Austria") %>%
+  slice(1:5)
+
+# ausdata %>% 
+ #  summarise(sumcount = sum(countreviewernat))
+# 36241 total reviews 
+
+# Spain
+## get counts and proportions of reviewer nationalities 
+spaindata <- maggiehoteldata %>%
+  filter(hotelcountry == "Spain") %>%
+  group_by(reviewer_nationality) %>%
+  summarise(countreviewernat = n(),
+            propreviewernat = countreviewernat / 59895) %>%
+  arrange(desc(countreviewernat)) %>%
+  mutate(hotelcountry = "Spain") %>%
+  slice(1:5)
+
+ # spaindata %>% 
+   # summarise(sumcount = sum(countreviewernat))
+# 59895 total reviews 
+
+
+# France
+## get counts and proportions of reviewer nationalities 
+francedata <- maggiehoteldata %>%
+  filter(hotelcountry == "France") %>%
+  group_by(reviewer_nationality) %>%
+  summarise(countreviewernat = n(),
+            propreviewernat = countreviewernat / 59011 ) %>%
+  arrange(desc(countreviewernat)) %>%
+  mutate(hotelcountry = "France") %>%
+  slice(1:5)
+
+# francedata %>% 
+   # summarise(sumcount = sum(countreviewernat))
+# 59011	 total reviews 
+
+# Italy
+## get counts and proportions of reviewer nationalities 
+italydata <- maggiehoteldata %>%
+  filter(hotelcountry == "Italy") %>%
+  group_by(reviewer_nationality) %>%
+  summarise(countreviewernat = n(),
+            propreviewernat = countreviewernat / 37170) %>%
+  arrange(desc(countreviewernat)) %>%
+  mutate(hotelcountry = "Italy") %>%
+  slice(1:5)
+
+# italydata %>% 
+   # summarise(sumcount = sum(countreviewernat))
+# 37170	total reviews
+
+# Combine all of the above 
+top5reviewernat <- rbind(ukdata,
+                         nldata,
+                         spaindata,
+                         francedata,
+                         italydata)
+
+ countrylevels <- names(sort(tapply(top5reviewernat$propreviewernat, # create levels to have stacked bar chart according to size not alphabetical order 
+                                    top5reviewernat$reviewer_nationality,
+                                    sum)))
+
+# Code for barplot 
+ 
+stackedbarplot <- ggplot(top5reviewernat, aes(x = hotelcountry, y = propreviewernat, 
+                            fill = factor(reviewer_nationality, levels = countrylevels))) +
+  geom_bar(stat = "identity") + 
+  scale_fill_manual(values = c("#810f7c", "#8856a7", "#8c96c6", "#9ebcda", "#bfd3e6", "#edf8fb",
+                              "#ccebc5", "#a8ddb5", "#7bccc4", "#43a2ca", "#0868ac")) +
+  labs(title = "Brits take over as Majority Reviewers",
+       subtitle = "Proportion of Top 5 Reviewer Nationalities per Country",
+      y = "Proportion of Total Reviews",
+      x = " ") +
+  theme(legend.title = element_blank(),
+panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        plot.title = element_text(size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(face="plain", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "bold"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "bold"),
+        axis.text.x=element_text(family="Montserrat", size=7),
+        legend.text=element_text(family="Montserrat", size=7))
+ 
+stackedbarplot
+
+```
