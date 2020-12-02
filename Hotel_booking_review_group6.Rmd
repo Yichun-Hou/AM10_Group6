@@ -220,10 +220,48 @@ my_grob = grid.text(my_text, x=0.82,  y=0.7,gp=gpar(fontfamily="Montserrat",font
 
 gg + annotation_custom(my_grob)
  
-
-
 ```
 
 
+# Average rating of hotels by country
+
+```{r}
+#7.hotels with highest ratings (possible: combined with location)
+
+#average rating of hotels by country
+hotel3<-hotel2 %>%
+  distinct(hotel_name,average_score,country)%>%
+  select(country,average_score) 
+  
+
+my_colours3 <- c("white", "#7BCC8F")
+is_france<-  hotel3%>% 
+mutate(
+    is_france = ifelse(country == "France",  TRUE, FALSE)) %>% 
+   mutate(country=recode(country, "Kingdom" = "United Kingdom"))
+
+
+ggplot(is_france, aes(x=average_score,y=reorder(country,average_score),fill=is_france))+
+  geom_violin()+
+  geom_boxplot(width=0.1)+
+  theme_minimal() +
+  theme(panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        axis.ticks.length = unit(.20, "cm"),
+        plot.title = element_text(color = "black",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#45B05F", face="bold", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "plain"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "plain"),
+        axis.text.x=element_text(family="Montserrat", size=7),
+        legend.text=element_text(family="Montserrat", size=7),
+        legend.title=element_text(family="Montserrat", size=8, face="bold"),
+        legend.position = "none")+
+    labs(title = "France has the highest median rating", subtitle= "Distribution of average ratings of hotels across 6 selected countries", x="Average rating of hotels", y="Country", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
+  scale_fill_manual(values = my_colours3)
+```
 
 
