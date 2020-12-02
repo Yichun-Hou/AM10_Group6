@@ -690,3 +690,38 @@ wordcloud(words = wordCountDoc_pos$word,
 
 ```
 
+
+# Hotel reviewed by highest number of alleged bots
+```{r}
+bots_by_hotel<-duplicates%>% 
+  group_by(hotel_name)%>%
+  summarise(count=n())%>%
+  mutate(is_culprit=ifelse(hotel_name=="H tel Concorde Montparnasse",1,0))%>% #for graph fill aesthetic
+  arrange(desc(count))%>%
+  slice(1:7) #selecting top 7 hotels for visualisation, so we arrange by desc(count) and slice the first 7
+
+ggplot(bots_by_hotel, aes(x=reorder(hotel_name,count), y=count, fill=factor(is_culprit))) +
+    geom_bar(stat="identity", alpha=0.8)+
+  coord_flip()+ #flip axes to show name of hotel
+theme_minimal() + #put simple theme to emnphasise the graphs
+  theme(panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        axis.ticks.length = unit(.20, "cm"),
+        plot.title = element_text(color = "#0868ac",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#0868ac", face="plain", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "plain"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "plain"),
+        axis.text.x=element_text(family="Montserrat", size=7),
+        legend.text=element_text(family="Montserrat", size=7),
+        legend.title=element_text(family="Montserrat", size=8, face="bold"),
+        legend.position = "none")+
+    labs(title = "Hotels reviewed by \nhighest number of alleged bots", subtitle= "", x="Hotels with alleged use of bots", y="Count", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence") +
+  scale_y_continuous()+
+  scale_fill_manual(values = c("grey80", "#0868ac"))+ #specifying the colours
+   geom_label(aes(label=count))
+```
+
