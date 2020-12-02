@@ -265,3 +265,37 @@ ggplot(is_france, aes(x=average_score,y=reorder(country,average_score),fill=is_f
 ```
 
 
+# Hotels of excellent ratings, by country
+
+```{r}
+##hotels with highest ratings
+##choose all hotels > 8/8.5/9
+hotel4<-hotel3%>%
+  filter(average_score>=9)%>%
+  group_by(country)%>%
+  summarise(count=n())%>%
+  mutate(is_best=ifelse(country=="Kingdom"|country=="France",1,0))
+
+ggplot(hotel4,aes(x=reorder(country,count),y=count,fill=factor(is_best)))+
+  geom_col(position="dodge")+
+  theme_minimal() +
+  theme(panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        axis.ticks.length = unit(.20, "cm"),
+        plot.title = element_text(color = "black",size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(color = "#45B05F", face="bold", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "plain"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "plain"),
+        axis.text.x=element_text(family="Montserrat", size=7, angle=30, hjust=1),
+        legend.text=element_text(family="Montserrat", size=7),
+        legend.title=element_text(family="Montserrat", size=8, face="bold"),
+        legend.position="none")+
+    labs(title = "UK & France dominate hotels with >9 average rating", subtitle= "Number of >9 rating hotels in 6 selected countries", x="Country", y="No. of hotels with rating >9", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence")+
+  scale_fill_manual(values=c("grey80","#7BCC8F")) +
+  coord_flip()
+
+```
