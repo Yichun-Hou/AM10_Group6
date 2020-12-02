@@ -297,5 +297,146 @@ ggplot(hotel4,aes(x=reorder(country,count),y=count,fill=factor(is_best)))+
     labs(title = "UK & France dominate hotels with >9 average rating", subtitle= "Number of >9 rating hotels in 6 selected countries", x="Country", y="No. of hotels with rating >9", caption="Source: https://www.kaggle.com/ployyyywa/global-hotel-chain-presence")+
   scale_fill_manual(values=c("grey80","#7BCC8F")) +
   coord_flip()
+```
+
+
+
+# Proportion of Top 5 Reviewer Nationalities per Country
+
+```{r}
+
+
+maggiehoteldata <- hotel2 %>% mutate(country=recode(
+  country, `Kingdom`= "United Kingdom")) %>%  # change Kingdom to United Kingdom to allow matching
+  rename(hotelcountry = country)
+
+# UK
+## get counts and proportions of reviewer nationalities 
+ukdata <- maggiehoteldata %>% 
+  filter(hotelcountry == "United Kingdom") %>%
+  group_by(reviewer_nationality) %>%
+  summarise(countreviewernat = n(), 
+            propreviewernat = countreviewernat / 261509) %>%
+  arrange(desc(countreviewernat)) %>%
+  mutate(hotelcountry = "United Kingdom") %>%
+  slice(1:5)
+
+# ukdata %>% 
+  # summarise(sumcount = sum(countreviewernat))
+# 261509 total reviews
+
+# Netherlands
+## get counts and proportions of reviewer nationalities 
+nldata <- maggiehoteldata %>% 
+  filter(hotelcountry == "Netherlands") %>%
+  group_by(reviewer_nationality) %>%
+  summarise(countreviewernat = n(),
+            propreviewernat = countreviewernat / 57119) %>%
+  arrange(desc(countreviewernat)) %>%
+  mutate(hotelcountry = "Netherlands") %>%
+  slice(1:5)
+
+# nldata %>% 
+  # summarise(sumcount = sum(countreviewernat))
+# 57119 total reviews 
+
+# Austria
+## get counts and proportions of reviewer nationalities 
+ausdata <- maggiehoteldata %>%
+  filter(hotelcountry == "Austria") %>%
+  group_by(reviewer_nationality) %>%
+  summarise(countreviewernat = n(),
+            propreviewernat = countreviewernat / 36241) %>%
+  arrange(desc(countreviewernat)) %>%
+  mutate(hotelcountry = "Austria") %>%
+  slice(1:5)
+
+# ausdata %>% 
+ #  summarise(sumcount = sum(countreviewernat))
+# 36241 total reviews 
+
+# Spain
+## get counts and proportions of reviewer nationalities 
+spaindata <- maggiehoteldata %>%
+  filter(hotelcountry == "Spain") %>%
+  group_by(reviewer_nationality) %>%
+  summarise(countreviewernat = n(),
+            propreviewernat = countreviewernat / 59895) %>%
+  arrange(desc(countreviewernat)) %>%
+  mutate(hotelcountry = "Spain") %>%
+  slice(1:5)
+
+ # spaindata %>% 
+   # summarise(sumcount = sum(countreviewernat))
+# 59895 total reviews 
+
+
+# France
+## get counts and proportions of reviewer nationalities 
+francedata <- maggiehoteldata %>%
+  filter(hotelcountry == "France") %>%
+  group_by(reviewer_nationality) %>%
+  summarise(countreviewernat = n(),
+            propreviewernat = countreviewernat / 59011 ) %>%
+  arrange(desc(countreviewernat)) %>%
+  mutate(hotelcountry = "France") %>%
+  slice(1:5)
+
+# francedata %>% 
+   # summarise(sumcount = sum(countreviewernat))
+# 59011	 total reviews 
+
+# Italy
+## get counts and proportions of reviewer nationalities 
+italydata <- maggiehoteldata %>%
+  filter(hotelcountry == "Italy") %>%
+  group_by(reviewer_nationality) %>%
+  summarise(countreviewernat = n(),
+            propreviewernat = countreviewernat / 37170) %>%
+  arrange(desc(countreviewernat)) %>%
+  mutate(hotelcountry = "Italy") %>%
+  slice(1:5)
+
+# italydata %>% 
+   # summarise(sumcount = sum(countreviewernat))
+# 37170	total reviews
+
+# Combine all of the above 
+top5reviewernat <- rbind(ukdata,
+                         nldata,
+                         spaindata,
+                         francedata,
+                         italydata)
+
+ countrylevels <- names(sort(tapply(top5reviewernat$propreviewernat, # create levels to have stacked bar chart according to size not alphabetical order 
+                                    top5reviewernat$reviewer_nationality,
+                                    sum)))
+
+# Code for barplot 
+ 
+stackedbarplot <- ggplot(top5reviewernat, aes(x = hotelcountry, y = propreviewernat, 
+                            fill = factor(reviewer_nationality, levels = countrylevels))) +
+  geom_bar(stat = "identity") + 
+  scale_fill_manual(values = c("#810f7c", "#8856a7", "#8c96c6", "#9ebcda", "#bfd3e6", "#edf8fb",
+                              "#ccebc5", "#a8ddb5", "#7bccc4", "#43a2ca", "#0868ac")) +
+  labs(title = "Brits take over as Majority Reviewers",
+       subtitle = "Proportion of Top 5 Reviewer Nationalities per Country",
+      y = "Proportion of Total Reviews",
+      x = " ") +
+  theme(legend.title = element_blank(),
+panel.grid.major.y = element_line(color = "gray60", size = 0.1),
+        panel.background = element_rect(fill = "white", colour = "white"),
+        axis.line = element_line(size = 1, colour = "grey80"),
+        axis.ticks = element_line(size = 3,colour = "grey80"),
+        plot.title = element_text(size=15,face="bold", family= "Montserrat"),
+        plot.subtitle = element_text(face="plain", ,size= 10,family= "Montserrat"),
+        plot.caption = element_text(color = "grey40", face="italic", ,size= 7,family= "Montserrat",hjust=0),
+        axis.title.y = element_text(size = 8, angle = 90, family="Montserrat", face = "bold"),
+        axis.text.y=element_text(family="Montserrat", size=7),
+        axis.title.x = element_text(size = 8, family="Montserrat", face = "bold"),
+        axis.text.x=element_text(family="Montserrat", size=7),
+        legend.text=element_text(family="Montserrat", size=7))
+ 
+stackedbarplot
 
 ```
