@@ -1,0 +1,48 @@
+---
+title: "Booking.com European landscape analysis"
+author: "Project Group 6"
+date: "29/11/2020"
+output: html_document
+---
+###Loading Packages
+```{r}
+library(ggplot2)
+library(janitor)
+library(tidyverse)
+library(caret)
+library(lubridate)
+library(factoextra)
+library(vroom)
+library(Hmisc)
+library(mice)
+library(readxl)
+library(skimr)
+library(data.table)
+library(grid)
+library(pBrackets)
+library(showtext)
+font_add_google("Montserrat", "Montserrat") #downloading fonts from Google
+showtext_auto()
+library(data.table)
+library(googlesheets4)
+library(opencage)
+
+```
+
+
+###Importing the Data Set
+```{r setup, include=FALSE}
+hotels_raw<-vroom("Hotel_Reviews 2.csv") %>% clean_names()
+
+global_hotel_chain_size <- read_excel("Global Hotel Chains Size.xlsx") %>%clean_names()
+                                      
+booking_satisfaction <- vroom("Europe Hotel Booking Satisfaction Score.csv")%>%clean_names()
+
+country_continent <- vroom("continents2.csv")%>%clean_names()
+
+```
+# Story Time
+
+ We are a group of individuals working within the Data Analytics Team at Booking.com, and have been asked to gather insights on the mid- to high-end (luxury) hotel market in Europe. We are to present our results to our Team Lead.
+
+
