@@ -44,5 +44,21 @@ country_continent <- vroom("continents2.csv")%>%clean_names()
 # Story Time
 
  We are a group of individuals working within the Data Analytics Team at Booking.com, and have been asked to gather insights on the mid- to high-end (luxury) hotel market in Europe. We are to present our results to our Team Lead.
+ 
+  
+# Cleaning Data Set global_hotel_chain_sizec
+First, let's have a look at the overall global luxury & upscale hotel market. 
+```{r}
+# let's have a look on our data set
+describe(global_hotel_chain_size) 
+
+#Remove empty columns and rows
+global_hotel_chain_size_clean<-remove_empty(global_hotel_chain_size, which = c("rows","cols"))
+
+
+describe(global_hotel_chain_size_clean) 
+
+```
+
 
 
