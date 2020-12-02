@@ -9,7 +9,7 @@ As such, our analysis will incorporate the following questions and components:
 - mapping of individual luxury hotels per city by average review score 
 - sentiment analysis: overview of the number of positive / negative words per review per continent, and per region; word clouds of most mentioned positive and negative words in reviews 
 - an investigation into bot (duplicate) entries
--	ADD OUR STATISTICAL METHOD 
+-	a final check of linear regression as to how predictive nationality and natural language processing (number of positive / negative words) are in predicting individual ratings
 
 
 **Data:**
