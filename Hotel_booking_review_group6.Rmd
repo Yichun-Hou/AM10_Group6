@@ -405,7 +405,8 @@ top5reviewernat <- rbind(ukdata,
                          nldata,
                          spaindata,
                          francedata,
-                         italydata)
+                         italydata,
+                         ausdata)
 
  countrylevels <- names(sort(tapply(top5reviewernat$propreviewernat, # create levels to have stacked bar chart according to size not alphabetical order 
                                     top5reviewernat$reviewer_nationality,
@@ -417,7 +418,7 @@ stackedbarplot <- ggplot(top5reviewernat, aes(x = hotelcountry, y = propreviewer
                             fill = factor(reviewer_nationality, levels = countrylevels))) +
   geom_bar(stat = "identity") + 
   scale_fill_manual(values = c("#810f7c", "#8856a7", "#8c96c6", "#9ebcda", "#bfd3e6", "#edf8fb",
-                              "#ccebc5", "#a8ddb5", "#7bccc4", "#43a2ca", "#0868ac")) +
+                              "#ccebc5", "#a8ddb5", "#7bccc4", "#43a2ca", "#0868ac", "darkblue")) +
   labs(title = "Brits take over as Majority Reviewers",
        subtitle = "Proportion of Top 5 Reviewer Nationalities per Country",
       y = "Proportion of Total Reviews",
